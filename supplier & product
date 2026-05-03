@@ -1,0 +1,61 @@
+import sys
+import gc
+class Supplier:
+    def __init__(self, s_name):
+        self.s_name = s_name
+    def __del__(self):
+        print(f"[GC] Supplier '{self.s_name}' memory released.")
+class Product:
+    def __init__(self, p_name, supplier, color, dims):
+        self.p_name = p_name
+        self.supplier = supplier  # Link to Supplier object
+        self.specs = self.Specs(color, dims)  # Inner class instance
+        print(f"[Inventory] Successfully logged: {self.p_name}")
+    def display_info(self):
+        print(f"Product: {self.p_name:12} | Supplier: {self.supplier.s_name:12} | ", end="")
+        self.specs.display_specs()
+    def __del__(self):
+        print(f"[GC] Product '{self.p_name}' memory released.")
+    class Specs:
+        """Inner class representing product specifications."""
+        def __init__(self, color, dims):
+            self.color = color
+            self.dims = dims
+        def display_specs(self):
+            print(f"Specs: [Color: {self.color}, Dimensions: {self.dims}]")
+def main():
+    suppliers = {}
+    products = []
+    try:
+        n = int(input("Enter number of products to add: "))
+    except ValueError:
+        print("Please enter a valid integer.")
+        return
+    for i in range(n):
+        print(f"\n--- Data Entry for Item {i + 1} ---")
+        p_name = input("Enter Product Name: ")
+        s_name = input("Enter Supplier Name: ")
+        color = input("Enter Color: ")
+        dims = input("Enter Dimensions: ")
+        if s_name not in suppliers:
+            suppliers[s_name] = Supplier(s_name)
+        products.append(Product(p_name, suppliers[s_name], color, dims))
+    print("\n" + "=" * 60)
+    print(f"{'CURRENT INVENTORY REPORT':^60}")
+    print("=" * 60)
+    for p in products:
+        p.display_info()
+    print("\n" + "=" * 60)
+    print(f"{'REFERENCE COUNT OBSERVATION':^60}")
+    print("=" * 60)
+    if products:
+        test_p = products[0]
+        test_s = test_p.supplier
+        print(f"Reference count for Product '{test_p.p_name}': {sys.getrefcount(test_p)}")
+        print(f"Reference count for Supplier '{test_s.s_name}': {sys.getrefcount(test_s)}")
+    print("\n--- Simulating Deletion (Releasing Memory) ---")
+    products.clear()
+    suppliers.clear()
+    gc.collect()
+if __name__ == "__main__":
+    main()
