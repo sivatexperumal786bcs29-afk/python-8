@@ -1,0 +1,61 @@
+import sys
+import gc
+class Student:
+    def __init__(self, roll_no, name):
+        self.roll_no = roll_no
+        self.name = name
+        self.courses = []  # List to store Course objects
+        print(f"\n[Registration] Student {self.name} (Roll: {self.roll_no}) registered.")
+    def add_course(self, course_name, credits):
+        # Instantiate inner class Course
+        new_course = self.Course(course_name, credits)
+        self.courses.append(new_course)
+    def display_student_info(self):
+        print(f"\nStudent: {self.name} | Roll No: {self.roll_no}")
+        print("Enrolled Courses:")
+        if not self.courses:
+            print("- No courses enrolled.")
+        for c in self.courses:
+            c.display_course()
+    def __del__(self):
+        print(f"[GC] Memory for Student {self.name} released.")
+    class Course:
+        def __init__(self, course_name, credits):
+            self.course_name = course_name
+            self.credits = credits
+        def display_course(self):
+            print(f"  -> Course: {self.course_name} ({self.credits} Credits)")
+
+        def __del__(self):
+            print(f"[GC] Course object '{self.course_name}' destroyed.")
+def main():
+    student_list = []
+    try:
+        n = int(input("Enter number of students to register: "))
+    except ValueError:
+        print("Invalid input. Please enter a number.")
+        return
+    for i in range(n):
+        s_name = input(f"\nEnter name for student {i + 1}: ")
+        s_roll = input(f"Enter roll number for {s_name}: ")
+        student_obj = Student(s_roll, s_name)
+        c_count = int(input(f"How many courses for {s_name}? "))
+        for _ in range(c_count):
+            c_name = input("  Enter course name: ")
+            c_cred = input("  Enter credits: ")
+            student_obj.add_course(c_name, c_cred)
+        student_list.append(student_obj)
+    print("\n" + "=" * 30)
+    print("UNIVERSITY ENROLLMENT REPORT")
+    print("=" * 30)
+    for s in student_list:
+        s.display_student_info()
+    if student_list:
+        test_student = student_list[0]
+        print(f"\n[Observation] Reference count for {test_student.name}: {sys.getrefcount(test_student)}")
+    print("\n--- Simulating Graduation (Clearing Records) ---")
+    student_list.clear()
+    gc.collect()
+    print("\nSystem Shutdown.")
+if __name__ == "__main__":
+    main()
