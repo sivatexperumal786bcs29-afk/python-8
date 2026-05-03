@@ -1,0 +1,46 @@
+import sys
+import gc
+class Employee:
+    def __init__(self, emp_id, name, city, street):
+        self.emp_id = emp_id
+        self.name = name
+        self.address = self.Address(city, street)
+        print(f"\n[Hiring] Employee {self.name} (ID: {self.emp_id}) has joined the company.")
+    def display_info(self):
+        print(f"ID: {self.emp_id} | Name: {self.name} | ", end="")
+        self.address.display_address()
+    def __del__(self):
+        """Destructor to monitor garbage collection."""
+        print(f"[Garbage Collector] Memory for Employee {self.name} has been released.")
+    class Address:
+        def __init__(self, city, street):
+            self.city = city
+            self.street = street
+        def display_address(self):
+            print(f"Address: {self.street}, {self.city}")
+def main():
+    employees = []
+    try:
+        n = int(input("Enter the number of employees to hire: "))
+    except ValueError:
+        print("Please enter a valid integer.")
+        return
+    for i in range(n):
+        print(f"\n--- Entry for Employee {i + 1} ---")
+        eid = input("Enter Employee ID: ")
+        ename = input("Enter Name: ")
+        ecity = input("Enter City: ")
+        estreet = input("Enter Street: ")
+        new_emp = Employee(eid, ename, ecity, estreet)
+        employees.append(new_emp)
+    print("\n" + "=" * 30)
+    print("ALL CURRENT EMPLOYEE PROFILES")
+    print("=" * 30)
+    for emp in employees:
+        emp.display_info()
+    print(f"\n--- Simulating Resignation for all {n} employees ---")
+    employees.clear()
+    gc.collect()
+    print("\nAll employee records handled. Program finished.")
+if __name__ == "__main__":
+    main()
