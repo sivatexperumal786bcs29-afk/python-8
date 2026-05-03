@@ -1,0 +1,68 @@
+import sys
+import gc
+class Company:
+    def __init__(self, cname):
+        self.cname = cname
+        self.employees = []
+        print(f"\n[System] Company '{self.cname}' has been established.")
+    def add_employee(self, emp_id, emp_name):
+        new_emp = self.Employee(emp_id, emp_name, self)
+        self.employees.append(new_emp)
+        print(f"[Hiring] {emp_name} (ID: {emp_id}) joined {self.cname}.")
+    def remove_employee(self, emp_id):
+        for emp in self.employees:
+            if emp.emp_id == emp_id:
+                print(f"[Resignation] {emp.emp_name} (ID: {emp_id}) has left the company.")
+                self.employees.remove(emp)
+                return
+        print(f"[Error] Employee ID {emp_id} not found.")
+    def display_all_employees(self):
+        print(f"\n--- {self.cname} Employee Roster ---")
+        if not self.employees:
+            print("No employees currently active.")
+        for emp in self.employees:
+            emp.display_details()
+    class Employee:
+        def __init__(self, emp_id, emp_name, company_instance):
+            self.emp_id = emp_id
+            self.emp_name = emp_name
+            self.company = company_instance
+        def display_details(self):
+            print(f"ID: {self.emp_id} | Name: {self.emp_name} | Company: {self.company.cname}")
+        def __del__(self):
+            """Destructor to monitor Garbage Collection."""
+            print(f"[GC] Memory released: Employee object '{self.emp_name}' destroyed.")
+def run_simulation():
+    comp_name = input("Enter Company Name: ")
+    my_company = Company(comp_name)
+    try:
+        num_employees = int(input("\nEnter number of employees to hire: "))
+    except ValueError:
+        print("Invalid input. Please enter a number.")
+        return
+    for i in range(num_employees):
+        print(f"\nEntry {i+1}:")
+        e_id = input("  Enter Employee ID: ")
+        e_name = input("  Enter Employee Name: ")
+        my_company.add_employee(e_id, e_name)
+    my_company.display_all_employees()
+    print("\n" + "="*40)
+    print("REFERENCE COUNT OBSERVATION")
+    print(f"References for Company '{my_company.cname}': {sys.getrefcount(my_company)}")
+    if my_company.employees:
+        first_emp = my_company.employees[0]
+        print(f"References for Employee '{first_emp.emp_name}': {sys.getrefcount(first_emp)}")
+    print("="*40)
+    print(f"\n--- Resignation Phase ---")
+    rem_count = int(input("How many employees are resigning? "))
+    for _ in range(rem_count):
+        r_id = input("Enter Employee ID to remove: ")
+        my_company.remove_employee(r_id)
+    print("\n[System] Cleaning up memory...")
+    gc.collect()
+    print("\n" + "="*40)
+    print("POST-RESIGNATION ROSTER")
+    my_company.display_all_employees()
+    print("="*40)
+if __name__ == "__main__":
+    run_simulation()
